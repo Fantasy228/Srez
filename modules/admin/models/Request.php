@@ -48,16 +48,25 @@ class Request extends \yii\db\ActiveRecord
             [['categoryID', 'statusID', 'created_by', 'updated_by'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'reject_msg', 'img_before', 'img_after'], 'string', 'max' => 255],
-            [['imageFileBefore'], 'file', 'skipOnEmpty' => false, 'extensions' => 'png, jpg, bmp', 'maxSize' => 10 * 1024 * 1024],
-            [['imageFileAfter'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bmp', 'maxSize' => 10 * 1024 * 1024],
+            [['imageFileBefore'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bmp, jpeg', 'maxSize' => 10 * 1024 * 1024],
+            [['imageFileAfter'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bmp, jpeg', 'maxSize' => 10 * 1024 * 1024],
             [['categoryID'], 'exist', 'skipOnError' => true, 'targetClass' => Category::className(), 'targetAttribute' => ['categoryID' => 'id']],
             [['statusID'], 'exist', 'skipOnError' => true, 'targetClass' => Status::className(), 'targetAttribute' => ['statusID' => 'id']],
+            ['reject_msg', 'required', 'when' => function($model, $attribute) { // Необходимо указание причины отказа при выборе статуса "Отказано"
+                return $model->statusID == 3;
+            }, 'enableClientValidation' => false],
+            ['imageFileAfter', 'required', 'when' => function($model, $attribute) { // Загрузка изображения результата обязательна при выборе статуса "Принято"
+                return $model->statusID == 2;
+            }, 'enableClientValidation' => true],
+            ['imageFileBefore', 'required', 'when' => function($model, $attribute) { // Загрузка изображения результата обязательна при выборе статуса "Принято"
+                return Yii::$app->controller->action->id == 'create';
+            }, 'enableClientValidation' => true]
         ];
     }
     public function behaviors()
     {
         return [
-            [
+            [ // Перед сохранением строки - ввод timestamp'а в необходимые поля
                 'class' => TimestampBehavior::className(),
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
@@ -65,7 +74,7 @@ class Request extends \yii\db\ActiveRecord
                 ],
                 'value' => new Expression('NOW()')
             ],
-            [
+            [ // Перед сохранением строки - ввод ID пользователя в необходимые поля
                 'class' => BlameableBehavior::className(),
                 'createdByAttribute' => 'created_by',
                 'updatedByAttribute' => 'updated_by'
@@ -117,9 +126,9 @@ class Request extends \yii\db\ActiveRecord
     public function upload()
     {
         if ($this->validate()) {
-            if ($this->imageFileBefore)
+            if ($this->imageFileBefore) // Если загружен файл - сохранение изображения в web/uploads и запись пути в переменную модели
             {
-                $pathBefore = 'uploads/' . $this->imageFileBefore->baseName . '-' . time() . '.' . $this->imageFileBefore->extension;
+                $pathBefore = 'uploads/' . $this->imageFileBefore->baseName . '-' . time() . '.' . $this->imageFileBefore->extension; // Добавляем timestamp для уникальности файла
                 $this->imageFileBefore->saveAs($pathBefore);
                 $this->img_before = $pathBefore;
             }

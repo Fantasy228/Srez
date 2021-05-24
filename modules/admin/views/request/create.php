@@ -16,5 +16,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $this->render('_form', [
         'model' => $model,
     ]) ?>
-
+    <?php Yii::$app->view->registerJsFile('@web/js/rejectMsgHide.js'); ?>
+    <?php Yii::$app->view->registerJsFile('@web/js/imgAfterHide.js'); ?>
 </div>

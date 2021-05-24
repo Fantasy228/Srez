@@ -26,7 +26,7 @@ class CategoryController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin']
+                        'roles' => ['admin'] // Проверка роли администратора
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {
@@ -135,6 +135,6 @@ class CategoryController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Запрошенная страница не существует.');
     }
 }

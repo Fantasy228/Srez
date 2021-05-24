@@ -17,5 +17,5 @@ $this->params['breadcrumbs'][] = 'Сохранить';
     <?= $this->render('_form', [
         'model' => $model,
     ]) ?>
-
+    <?php Yii::$app->view->registerJsFile('@web/js/imgAfterHide.js'); ?>
 </div>

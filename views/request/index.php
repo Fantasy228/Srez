@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\admin\models\RequestSearch */
@@ -26,13 +27,32 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             'name',
-            'categoryID',
+            [
+                'attribute' => 'categoryID',
+                'value' => function($model)
+                {
+                    return $model->category->name; // Отображение названия категории
+                },
+                'format' => 'html',
+                'filter' => ArrayHelper::map($categories, 'id', 'name'), // Получение пар ключ-значение категорий
+                'filterInputOptions' => ['class' => 'form-control', 'prompt' => 'Все', 'id' => null]
+            ],
+            [
+                'attribute' => 'statusID',
+                'value' => function($model)
+                {
+                    return $model->status->name; // Отображение названия статуса
+                },
+                'format' => 'html',
+                'filter' => ArrayHelper::map($statuses, 'id', 'name'), // Получение пар ключ-значение статусов
+                'filterInputOptions' => ['class' => 'form-control', 'prompt' => 'Все', 'id' => null]
+            ],
             //'img_before',
             [
                 'attribute' => 'img_before',
                 'value' => function($model)
                 {   
-                    return Html::img('/'.$model->img_before, ['width' => 100]);
+                    return Html::img('/'.$model->img_before, ['width' => 100]); // Отображение изображения ДО
                 },
                 'format' => 'html'
             ],
@@ -40,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'img_after',
                 'value' => function($model)
                 {   
-                    return Html::img('/'.$model->img_after, ['width' => 100]);
+                    return Html::img('/'.$model->img_after, ['width' => 100]); // Отображение изображения ПОСЛЕ
                 },
                 'format' => 'html'
             ],

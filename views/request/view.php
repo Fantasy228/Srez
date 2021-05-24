@@ -29,13 +29,40 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'id',
             'name',
-            'categoryID',
-            'statusID',
+            [
+                'attribute' => 'categoryID',
+                'value' => function($model)
+                {
+                    return $model->category->name; // Отображение названия категории
+                },
+                'format' => 'html'
+            ],
+            [
+                'attribute' => 'statusID',
+                'value' => function($model)
+                {
+                    return $model->status->name; // Отображение названия категории
+                },
+                'format' => 'html'
+            ],
             'reject_msg',
-            'img_before',
-            'img_after',
+            [
+                'attribute' => 'img_before',
+                'value' => function($model)
+                {   
+                    return Html::img('/'.$model->img_before, ['width' => 200]); // Отображение изображения ДО
+                },
+                'format' => 'html'
+            ],
+            [
+                'attribute' => 'img_after',
+                'value' => function($model)
+                {   
+                    return Html::img('/'.$model->img_after, ['width' => 200]); // Отображение изображения ПОСЛЕ
+                },
+                'format' => 'html'
+            ],
             'created_by',
             'updated_by',
             'created_at',

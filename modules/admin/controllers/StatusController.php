@@ -23,7 +23,7 @@ class StatusController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'rules' => [
+                'rules' => [ // Проверка роли администратора
                     [
                         'allow' => true,
                         'roles' => ['admin']
@@ -135,6 +135,6 @@ class StatusController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Запрошенная страница не существует.');
     }
 }

@@ -23,7 +23,7 @@ class DefaultController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin']
+                        'roles' => ['admin'] // Проверка роли администратора
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {

@@ -5,6 +5,8 @@ namespace app\modules\admin\controllers;
 use Yii;
 use app\modules\admin\models\Request;
 use app\modules\admin\models\RequestSearch;
+use app\modules\admin\models\Category;
+use app\modules\admin\models\Status;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -20,6 +22,7 @@ class RequestController extends Controller
     /**
      * {@inheritdoc}
      */
+
     public function behaviors()
     {
         return [
@@ -28,7 +31,7 @@ class RequestController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin']
+                        'roles' => ['admin'] // Проверка роли администратора
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {
@@ -53,9 +56,14 @@ class RequestController extends Controller
         $searchModel = new RequestSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $statuses = Status::find()->all();
+        $categories = Category::find()->all();
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'statuses' => $statuses,
+            'categories' => $categories
         ]);
     }
 
@@ -83,16 +91,15 @@ class RequestController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore');
+            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore'); // Получаем url к изображению из формы
             $model->imageFileAfter = UploadedFile::getInstance($model, 'imageFileAfter');
             if ($model->upload()) {
                 $model->save(false);
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
-
         return $this->render('create', [
-            'model' => $model,
+            'model' => $model
         ]);
     }
 
@@ -108,10 +115,16 @@ class RequestController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) {
-            if (!$model->imageFileBefore){
-                $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore');
-            }
+
+            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore'); // Получаем url к изображению из формы
             $model->imageFileAfter = UploadedFile::getInstance($model, 'imageFileAfter');
+
+            if ($model->imageFileBefore && $model->img_before){ // Если файл был загружен - удаляем старое фото
+                unlink(Yii::$app->basePath . '/web/' . $model->img_before);
+            }
+            if ($model->imageFileAfter && $model->img_after){
+                unlink(Yii::$app->basePath . '/web/' . $model->img_after);
+            }
             if ($model->upload()) {
                 $model->save(false);
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -119,7 +132,7 @@ class RequestController extends Controller
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $model
         ]);
     }
 
@@ -132,7 +145,18 @@ class RequestController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if ($model->img_before) // Если у запроса есть ссылки на изображения в бд - удаляем их из uploads
+        {
+            unlink(Yii::$app->basePath . '/web/' . $model->img_before);
+        }
+        if ($model->img_after)
+        {
+            unlink(Yii::$app->basePath . '/web/' . $model->img_after);
+        }
+
+        $model->delete(); // Удаление запроса
 
         return $this->redirect(['index']);
     }
@@ -152,6 +176,6 @@ class RequestController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Запрошенная страница не существует.');
     }
 }

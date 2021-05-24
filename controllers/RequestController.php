@@ -5,6 +5,8 @@ namespace app\controllers;
 use Yii;
 use app\models\Request;
 use app\models\RequestSearch;
+use app\modules\admin\models\Category;
+use app\modules\admin\models\Status;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -28,7 +30,7 @@ class RequestController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['author', 'admin']
+                        'roles' => ['author', 'admin'] // Проверка роли администратора || пользователя
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {
@@ -50,13 +52,16 @@ class RequestController extends Controller
      */
     public function actionIndex()
     {
-        // Request::find()->where(['id' => Yii::$app->user->id])->orderBy('created_at', 'DESC')->all();
         $searchModel = new RequestSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $categories = Category::find()->asArray()->all(); // Получаем все категории и статусы
+        $statuses = Status::find()->asArray()->all();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
+            'categories' => $categories,
+            'statuses' => $statuses
         ]);
     }
 
@@ -84,7 +89,7 @@ class RequestController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
 
-            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore');
+            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore');  // Получаем url к изображению из формы
             if ($model->upload()) {
                 $model->save(false);
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -107,12 +112,26 @@ class RequestController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            $model->imageFileBefore = UploadedFile::getInstance($model, 'imageFileBefore');  // Получаем url к изображению из формы
+            $model->imageFileAfter = UploadedFile::getInstance($model, 'imageFileAfter');
+
+            if ($model->imageFileBefore && $model->img_before){ // Если файл был загружен - удаляем старое фото
+                unlink(Yii::$app->basePath . '/web/' . $model->img_before);
+            }
+            if ($model->imageFileAfter && $model->img_after){
+                unlink(Yii::$app->basePath . '/web/' . $model->img_after);
+            }
+
+            if ($model->upload()) {
+                $model->save(false);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $model
         ]);
     }
 
@@ -125,7 +144,18 @@ class RequestController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if ($model->img_before) // Если у запроса есть ссылки на изображения в бд - удаляем их из uploads
+        {
+            unlink(Yii::$app->basePath . '/web/' . $model->img_before);
+        }
+        if ($model->img_after)
+        {
+            unlink(Yii::$app->basePath . '/web/' . $model->img_after);
+        }
+
+        $model->delete(); // Удаление запроса
 
         return $this->redirect(['index']);
     }
@@ -141,10 +171,10 @@ class RequestController extends Controller
 
     protected function findModel($id)
     {
-        if (($model = Request::findOne($id)) !== null && $model['created_by'] == Yii::$app->user->id) {
+        if (($model = Request::findOne($id)) !== null && $model['created_by'] == Yii::$app->user->id) { // Вывод запроса авторизованного пользователя
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Запрошенной страницы не существует.');
     }
 }

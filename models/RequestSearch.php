@@ -42,7 +42,7 @@ class RequestSearch extends Request
     public function search($params)
     {
         
-        $query = Request::find()->where(['created_by' => Yii::$app->user->id]);
+        $query = Request::find()->where(['created_by' => Yii::$app->user->id])->orderBy(['created_at' => SORT_DESC]); // Отображение запросов авторизованного пользователя
 
         // add conditions that should always apply here
 

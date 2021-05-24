@@ -1,3 +1,17 @@
+@keyframes popUp
+{
+    0%
+    {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    100%
+    {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
 html,
 body {
     height: 100%;
@@ -103,8 +117,10 @@ a.desc:after {
     display: inline-block!important;
     margin: 2rem;
     padding: 2rem 2rem;
-    box-shadow: 1px 1px 30px rgba(0,0,0,0.1);
-    border-radius: 30px;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow:  20px 20px 60px #d9d9d9,
+                 -20px -20px 60px #ffffff;
 }
 
 .request-img-before
@@ -117,10 +133,10 @@ a.desc:after {
     margin: 1rem 1rem 3rem 1rem;
 }
 
-.request-img-after
+.request-img-after /* Наложение изображение поверх другого */
 {
     position: absolute;
-    transition: opacity 1s ease, transform 1s ease;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     background: white;
     z-index: 99;
     opacity: 1;
@@ -131,6 +147,13 @@ a.desc:after {
     opacity: 0;
     transform: scale(1);
 }
+
+.wrap > div.container > div
+{
+    animation: popUp 0.5s ease forwards;
+}
+
+/*END CUSTOMED*/
 
 @media(max-width:767px) {
     .nav li > form > button.logout {
@@ -148,4 +171,15 @@ a.desc:after {
 
 .nav > li > form > button.logout:focus {
     outline: none;
+}
+
+#countValue 
+{
+    color: rgb(58, 153, 58);
+}
+.jumbotron
+{
+    background: rgba(0,0,0,0.5);
+    border-radius: 45px!important;
+    box-shadow: 1px 1px 30px rgba(0,0,0,0.1);
 }

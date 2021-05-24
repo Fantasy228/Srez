@@ -24,6 +24,9 @@ class AppAsset extends AssetBundle
     ];
     public $js = [
     ];
+    public $jsOptions = array(
+        'position' => \yii\web\View::POS_HEAD
+    );
     public $depends = [
         'yii\web\YiiAsset',
         'raoul2000\bootswatch\BootswatchAsset',

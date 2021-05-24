@@ -9,7 +9,6 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
-
 raoul2000\bootswatch\BootswatchAsset::$theme = 'cosmo';
 AppAsset::register($this);
 ?>
@@ -38,10 +37,10 @@ AppAsset::register($this);
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
-            Yii::$app->user->id == '100' ? (
+            Yii::$app->user->id == '100' ? ( 
                 ['label' => 'Администрирование', 'url' => ['/admin']]
             ) : "",
-            !Yii::$app->user->isGuest ? (
+            !Yii::$app->user->isGuest ? ( 
                 ['label' => 'Мои заявки', 'url' => ['/request']]
             ) : "",
             Yii::$app->user->isGuest ? (

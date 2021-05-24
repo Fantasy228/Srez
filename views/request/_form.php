@@ -16,12 +16,25 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'categoryID')->dropdownList(\yii\helpers\ArrayHelper::map(\app\modules\admin\models\Category::find()->all(), 'id', 'name')) ?>
 
+    <?php
+        if(Yii::$app->controller->action->id == 'update') // Отображение поля на указанном action'е
+        {
+            echo $form->field($model, 'statusID')->dropdownList(\yii\helpers\ArrayHelper::map(\app\modules\admin\models\Status::find()->where(['!=', 'name', 'Отказано'])->all(), 'id', 'name'));
+        }
+    ?>
+
     <?= $form->field($model, 'imageFileBefore')->fileInput() ?>
+
+    <?php
+        if(Yii::$app->controller->action->id == 'update') // Отображение поля на указанном action'е
+        {
+            echo $form->field($model, 'imageFileAfter')->fileInput();
+        }
+    ?>
 
     <div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
-
 </div>
